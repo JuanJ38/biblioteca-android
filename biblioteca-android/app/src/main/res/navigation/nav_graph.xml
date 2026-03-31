@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/nav_libros">
+
+    <fragment
+        android:id="@+id/nav_libros"
+        android:name="com.biblioteca.app.ui.libros.LibrosFragment"
+        android:label="Libros"/>
+
+    <fragment
+        android:id="@+id/nav_prestamos"
+        android:name="com.biblioteca.app.ui.prestamos.PrestamosFragment"
+        android:label="Préstamos"/>
+
+    <fragment
+        android:id="@+id/nav_usuarios"
+        android:name="com.biblioteca.app.ui.usuarios.UsuariosFragment"
+        android:label="Usuarios"/>
+
+</navigation>
