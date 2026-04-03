@@ -25,7 +25,14 @@ class LibroViewModel : ViewModel() {
                 if (response.isSuccessful) {
                     _libros.value = Resource.Success(response.body() ?: emptyList())
                 } else {
-                    _libros.value = Resource.Error("Error al cargar libros")
+                    val mensaje = when (response.code()) {
+                        401 -> "Sesión expirada, vuelve a iniciar sesión"
+                        403 -> "No tienes permiso para ver los libros"
+                        404 -> "Recurso no encontrado"
+                        500 -> "Error en el servidor, intenta más tarde"
+                        else -> "Error ${response.code()} al cargar libros"
+                    }
+                    _libros.value = Resource.Error(mensaje)
                 }
             } catch (e: Exception) {
                 _libros.value = Resource.Error("Error de conexión")
