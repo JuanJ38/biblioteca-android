@@ -2,6 +2,8 @@ package com.biblioteca.app.ui.libros
 
 import android.app.AlertDialog
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,7 +11,6 @@ import android.widget.EditText
 import android.widget.LinearLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import com.biblioteca.app.R
 import com.biblioteca.app.databinding.FragmentLibrosBinding
 import com.biblioteca.app.model.Libro
 import com.biblioteca.app.utils.Resource
@@ -49,6 +50,26 @@ class LibrosFragment : Fragment() {
 
         binding.recyclerView.adapter = adapter
 
+        // TextWatcher aquí fuera, se registra al crear la pantalla
+        binding.etBuscar.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: Editable?) {
+                val query = s.toString().trim().lowercase()
+                val listaCompleta = (viewModel.libros.value as? Resource.Success)?.data ?: return
+                val listaFiltrada = if (query.isEmpty()) {
+                    listaCompleta.toList()
+                } else {
+                    listaCompleta.filter {
+                        it.titulo.lowercase().contains(query) ||
+                                it.autor.lowercase().contains(query)
+                    }
+                }
+                adapter.submitList(null)
+                adapter.submitList(listaFiltrada)
+            }
+        })
+
         binding.swipeRefresh.setOnRefreshListener {
             viewModel.cargarLibros(session.getBearerToken())
         }
@@ -63,8 +84,18 @@ class LibrosFragment : Fragment() {
                 is Resource.Loading -> binding.progressBar.visibility = View.VISIBLE
                 is Resource.Success -> {
                     binding.progressBar.visibility = View.GONE
-                    adapter.submitList(result.data)
-                    binding.tvEmpty.visibility = if (result.data.isEmpty()) View.VISIBLE else View.GONE
+                    // Al recargar, respeta el filtro activo
+                    val query = binding.etBuscar.text.toString().trim().lowercase()
+                    val listaFiltrada = if (query.isEmpty()) {
+                        result.data
+                    } else {
+                        result.data.filter {
+                            it.titulo.lowercase().contains(query) ||
+                                    it.autor.lowercase().contains(query)
+                        }
+                    }
+                    adapter.submitList(listaFiltrada)
+                    binding.tvEmpty.visibility = if (listaFiltrada.isEmpty()) View.VISIBLE else View.GONE
                 }
                 is Resource.Error -> {
                     binding.progressBar.visibility = View.GONE
