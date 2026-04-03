@@ -100,10 +100,10 @@ class LibrosFragment : Fragment() {
             .setPositiveButton("Guardar") { _, _ ->
                 val titulo = etTitulo.text.toString().trim()
                 val autor = etAutor.text.toString().trim()
-                if (titulo.isNotEmpty() && autor.isNotEmpty()) {
-                    viewModel.crearLibro(session.getBearerToken(), Libro(titulo = titulo, autor = autor))
-                } else {
-                    Snackbar.make(binding.root, "Completa todos los campos", Snackbar.LENGTH_SHORT).show()
+                when {
+                    titulo.length < 2 -> Snackbar.make(binding.root, "El título debe tener al menos 2 caracteres", Snackbar.LENGTH_SHORT).show()
+                    autor.length < 2 -> Snackbar.make(binding.root, "El autor debe tener al menos 2 caracteres", Snackbar.LENGTH_SHORT).show()
+                    else -> viewModel.crearLibro(session.getBearerToken(), Libro(titulo = titulo, autor = autor))
                 }
             }
             .setNegativeButton("Cancelar", null)
